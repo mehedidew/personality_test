@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:personality_test/global/global.dart';
+import 'package:personality_test/screens/question_ui.dart';
 import 'package:sizer/sizer.dart';
 
 class HomeUI extends StatefulWidget {
@@ -49,7 +50,12 @@ class _HomeUIState extends State<HomeUI> {
                     ),
                   ),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => QuestionUI(
+                            questions: questions,
+                          )));
+                },
                 child: Center(
                     child: Text(
                   'Start the test',
