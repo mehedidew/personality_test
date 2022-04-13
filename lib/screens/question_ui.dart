@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:personality_test/global/global.dart';
 import 'package:personality_test/model/questionModel.dart';
 import 'package:sizer/sizer.dart';
@@ -81,13 +82,12 @@ class _QuestionUIState extends State<QuestionUI> {
                         shrinkWrap: true,
                         itemCount: question.answers.length,
                         itemBuilder: (context, index) {
-                          return SizedBox(
-                            width: 70.w,
-                            child: Directionality(
-                              textDirection: TextDirection.rtl,
+                          return Padding(
+                            padding: EdgeInsets.symmetric(vertical: 1.h),
+                            child: SizedBox(
+                              height: 6.h,
                               child: ElevatedButton(
                                 style: ButtonStyle(
-                                  // backgroundColor: MaterialStateProperty.all(lightPink),
                                   elevation: MaterialStateProperty.resolveWith(
                                     (states) {
                                       if (states.contains(MaterialState.pressed)) {
@@ -102,15 +102,20 @@ class _QuestionUIState extends State<QuestionUI> {
                                       borderRadius: BorderRadius.circular(4.sp),
                                     ),
                                   ),
+                                  backgroundColor: MaterialStateProperty.all(question.selected == question.answers[index] ? Colors.white : Colors.pink),
                                 ),
-                                onPressed: () {},
+                                onPressed: () {
+                                  setState(() {
+                                    question.selected = question.answers[index];
+                                  });
+                                },
                                 child: Center(
                                     child: Text(
                                   question.answers[index].text,
+                                  textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: question.selected == question.answers[index] ? pink : Colors.white,
                                     fontSize: 10.0.sp,
-                                    letterSpacing: 2,
                                     fontWeight: FontWeight.bold,
                                     fontFamily: 'OpenSans',
                                   ),
@@ -145,7 +150,19 @@ class _QuestionUIState extends State<QuestionUI> {
                             ),
                           ),
                           onPressed: () {
-                            _pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeIn);
+                            if (question.selected != null) {
+                              _pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeIn);
+                              print(question.selected?.score);
+                            } else {
+                              Fluttertoast.showToast(
+                                  msg: "Please select an answer",
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.BOTTOM,
+                                  timeInSecForIosWeb: 1,
+                                  backgroundColor: lightPink,
+                                  textColor: Colors.pink,
+                                  fontSize: 12.sp);
+                            }
                           },
                           child: Center(
                               child: Text(
@@ -169,5 +186,46 @@ class _QuestionUIState extends State<QuestionUI> {
         ),
       ),
     );
+  }
+
+  button(bool last, VoidCallback voidCallback) {
+    if (last == true) {
+    } else {
+      return SizedBox(
+        height: 5.h,
+        width: 40.w,
+        child: ElevatedButton(
+          style: ButtonStyle(
+            // backgroundColor: MaterialStateProperty.all(lightPink),
+            elevation: MaterialStateProperty.resolveWith(
+              (states) {
+                if (states.contains(MaterialState.pressed)) {
+                  return 2.sp;
+                } else {
+                  return 6.sp;
+                }
+              },
+            ),
+            shape: MaterialStateProperty.all(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4.sp),
+              ),
+            ),
+          ),
+          onPressed: voidCallback,
+          child: Center(
+              child: Text(
+            buttonText,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 10.0.sp,
+              letterSpacing: 2,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'OpenSans',
+            ),
+          )),
+        ),
+      );
+    }
   }
 }
