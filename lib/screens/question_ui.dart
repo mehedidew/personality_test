@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:personality_test/global/global.dart';
 import 'package:personality_test/model/questionModel.dart';
+import 'package:personality_test/screens/result_ui.dart';
 import 'package:sizer/sizer.dart';
 
 class QuestionUI extends StatefulWidget {
@@ -16,7 +17,9 @@ class QuestionUI extends StatefulWidget {
 class _QuestionUIState extends State<QuestionUI> {
   final PageController _pageController = PageController(initialPage: 0);
   late List<QuestionModel> questionList;
-  String buttonText = 'Next';
+
+  int score = 0;
+  bool lastPage = false;
   @override
   void initState() {
     super.initState();
@@ -49,6 +52,13 @@ class _QuestionUIState extends State<QuestionUI> {
             child: PageView(
               controller: _pageController,
               scrollDirection: Axis.horizontal,
+              onPageChanged: (int page) {
+                if (page == questionList.length - 1) {
+                  setState(() {
+                    lastPage = true;
+                  });
+                }
+              },
               physics: const NeverScrollableScrollPhysics(),
               children: List.generate(questionList.length, (index) {
                 QuestionModel question = questionList[index];
@@ -57,6 +67,7 @@ class _QuestionUIState extends State<QuestionUI> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
+                    ///question
                     Container(
                       width: 80.w,
                       child: Text(
@@ -76,6 +87,8 @@ class _QuestionUIState extends State<QuestionUI> {
                         textAlign: TextAlign.center,
                       ),
                     ),
+
+                    ///answers
                     Container(
                       width: 90.w,
                       child: ListView.builder(
@@ -126,6 +139,8 @@ class _QuestionUIState extends State<QuestionUI> {
                         },
                       ),
                     ),
+
+                    ///button
                     SizedBox(
                       height: 5.h,
                       width: 40.w,
@@ -151,8 +166,18 @@ class _QuestionUIState extends State<QuestionUI> {
                           ),
                           onPressed: () {
                             if (question.selected != null) {
-                              _pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeIn);
-                              print(question.selected?.score);
+                              score += question.selected!.score;
+                              if (lastPage == true) {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => ResultUI(
+                                              score: score,
+                                            )));
+                              } else {
+                                _pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeIn);
+                                print(question.selected?.score);
+                              }
                             } else {
                               Fluttertoast.showToast(
                                   msg: "Please select an answer",
@@ -166,7 +191,7 @@ class _QuestionUIState extends State<QuestionUI> {
                           },
                           child: Center(
                               child: Text(
-                            buttonText,
+                            (lastPage == true) ? 'Result' : 'Next',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 10.0.sp,
@@ -186,46 +211,5 @@ class _QuestionUIState extends State<QuestionUI> {
         ),
       ),
     );
-  }
-
-  button(bool last, VoidCallback voidCallback) {
-    if (last == true) {
-    } else {
-      return SizedBox(
-        height: 5.h,
-        width: 40.w,
-        child: ElevatedButton(
-          style: ButtonStyle(
-            // backgroundColor: MaterialStateProperty.all(lightPink),
-            elevation: MaterialStateProperty.resolveWith(
-              (states) {
-                if (states.contains(MaterialState.pressed)) {
-                  return 2.sp;
-                } else {
-                  return 6.sp;
-                }
-              },
-            ),
-            shape: MaterialStateProperty.all(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4.sp),
-              ),
-            ),
-          ),
-          onPressed: voidCallback,
-          child: Center(
-              child: Text(
-            buttonText,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 10.0.sp,
-              letterSpacing: 2,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'OpenSans',
-            ),
-          )),
-        ),
-      );
-    }
   }
 }
